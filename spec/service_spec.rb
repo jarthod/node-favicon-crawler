@@ -10,12 +10,34 @@ describe 'service.js' do
   end
 
   let(:google_favicon) { File.read('spec/google-favicon.ico').force_encoding('ascii-8bit') }
+  let(:google_icon) { File.read('spec/google-icon.png').force_encoding('ascii-8bit') }
+  let(:dashlane_icon) { File.read('spec/dashlane.ico').force_encoding('ascii-8bit') }
 
-  it 'should return valid favicon for google.com' do
+  it 'should return valid icon for google.com' do
     open("http://localhost:3000/www.google.com") do |f|
-      f.content_type.should == 'image/x-icon'
-      f.read.should == google_favicon
+      f.content_type.should == 'image/png'
+      f.read.should == google_icon
     end
+  end
+
+  it 'should follow redirect during favicon fetching' do
+    open("http://localhost:3000/google.com") do |f|
+      f.content_type.should == 'image/png'
+      f.read.should == google_icon
+    end
+  end
+
+  it 'should return valid icon for dashlane.com' do
+    open("http://localhost:3000/dashlane.com") do |f|
+      f.content_type.should == 'image/x-icon'
+      f.read.should == dashlane_icon
+    end
+  end
+
+  it 'should return 404 when no favicon available' do
+    expect {
+      open("http://localhost:3000/www.rixml.org")      
+    }.to raise_error(OpenURI::HTTPError)
   end
 
   after :all do
